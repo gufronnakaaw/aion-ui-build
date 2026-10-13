@@ -32,6 +32,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Patch Dockerfile for Bun workspace install
+        run: |
+          if [ -f Dockerfile ] && [ -d packages ] && grep -q "RUN bun install --ignore-scripts" Dockerfile; then
+            if ! grep -q "^COPY packages/ ./packages/$" Dockerfile; then
+              sed -i '/RUN bun install --ignore-scripts/i COPY packages/ ./packages/' Dockerfile
+            fi
+          fi
+
       - uses: docker/build-push-action@v6
         with:
           context: .
